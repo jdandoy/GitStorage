@@ -23,7 +23,7 @@ def main():
 
   pids = []
   logFiles = []
-  NCORES = 5
+  NCORES = 8
   if not os.path.exists("parallelLogs/"):
     os.makedirs("parallelLogs/")
 
@@ -35,7 +35,7 @@ def main():
   boolOptions, valOptions, values = [],[],[]
   while iArg < len(sys.argv):
     if not sys.argv[iArg].startswith('-'):
-      print "Error, arguement ", sys.argv[iArg], " doesn't start with '-'"
+      print "Error, argument ", sys.argv[iArg], " doesn't start with '-'"
       exit(1)
     if iArg == len(sys.argv)-1:
       boolOptions.append( sys.argv[iArg] )
@@ -48,8 +48,6 @@ def main():
       values.append( sys.argv[iArg+1].split(',') )
       iArg+=2
 
-  print valOptions
-  print values
   ## Add all option strings to their option values ##
   commandsList = []
   for iOption, option in enumerate(valOptions):
@@ -74,9 +72,6 @@ def main():
       commandsList[iC] += ' '+boolOpt
 
 
-  print commandsList
-  exit(1)
-
   for iC, command in enumerate(commandsList):
     while len(pids) >= NCORES:
       wait_completion(pids, logFiles)
@@ -91,6 +86,7 @@ def main():
 
 def submit_local_job(exec_sequence, logfilename):
   output_f=open(logfilename, 'w')
+  print "Executing ", exec_sequence
   pid = subprocess.Popen(exec_sequence, shell=True, stderr=output_f, stdout=output_f)
   time.sleep(0.1)  #Wait to prevent opening / closing of several files
 
