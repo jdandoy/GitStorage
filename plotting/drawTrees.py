@@ -33,7 +33,7 @@ for histInfo in histInfos:
 
 
 
-inputTree = "group.phys-exotics.mc15_13TeV.361024.Pythia8EvtGen_A14NNPDF23LO_jetjet_JZ4W.MJB_JZW_v3_20150718_tree.root"
+inputTree = "group.phys-exotics.mc15_13TeV.361024.Pythia8EvtGen_A14NNPDF23LO_jetjet_JZ4W.All_1.QCDPythia8_v3_20150817_tree.root"
 inFile = ROOT.TFile(inputTree, "READ")
 inTree = inFile.Get("outTree_Nominal")
 for iBranch, thisBranch in enumerate(iTree.GetListOfBranches()):
