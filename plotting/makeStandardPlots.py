@@ -27,6 +27,7 @@ parser.add_argument("--normToData", dest='normToData', action='store_true', defa
 parser.add_argument("--normToBkg", dest='normToBkg', action='store_true', default=False, help="Normalize all files to the first background File")
 parser.add_argument("--differential", dest='differential', action='store_true', default=False, help="Draw differential")
 parser.add_argument("--plotDijetSlices", dest='plotDijetSlices', action='store_true', default=False, help="Plot dijet only with each slice a different color")
+parser.add_argument("--stackBkg", dest='stackBkg', action='store_true', default=False, help="Stack the backgrounds together")
 parser.add_argument("--noStackSignal", dest='noStackSignal', action='store_true', default=False, help="When signal and background are both present, do not stack them")
 parser.add_argument("--inDir", dest='inDir', default="./", help="Default directory to find all histograms")
 parser.add_argument("--dataDir", dest='dataDir', default=None, help="Directory to find data histograms")
@@ -279,6 +280,7 @@ def getHists( sampleName, fileList, histNames ):
 
 ##################################### Plotting Code ###########################################
 def plotAll( SampleNames, SampleTypes, HistNames, Hists):
+  print "plotAll"
 
   ### Align histograms and reorder so histName is first dimension ###
   #Hists are [fileType][histName]
@@ -300,13 +302,34 @@ def plotAll( SampleNames, SampleTypes, HistNames, Hists):
 
 
   for iHist, histName in enumerate(HistNames):
-    formatHists(SampleTypes, Hists[iHist])
-    lumiScale = getLumiDifference(SampleTypes, Hists[iHist])
-    scaleHists(SampleTypes, Hists[iHist], lumiScale)
-    if ( type(Hists[iHist][0]) == ROOT.TH1D or type(Hists[iHist][0]) == ROOT.TH1F ):
-      plot1D( Hists[iHist], SampleTypes )
+    theseHists = Hists[iHist]
+    theseTypes = SampleTypes
+    formatHists(theseTypes, theseHists)
+    lumiScale = getLumiDifference(theseTypes, theseHists)
+    if(args.stackBkg):
+      theseTypes, theseHists = stackBkg(theseTypes, theseHists)
+    else:
+      scaleHists(theseTypes, theseHists, lumiScale)
+    if ( type(theseHists[0]) == ROOT.TH1D or type(theseHists[0]) == ROOT.TH1F or type(theseHists[0]) == ROOT.THStack ):
+      plot1D( theseHists, theseTypes )
 
 #    plotHists( SampleNames, histsToPlot, histName[0], HistTypes, args.outputTag, args.outputVersion )
+
+def stackBkg(SampleTypes, Hists):
+
+  newSampleTypes = []
+  newHists = []
+
+  newSampleTypes.append( "stack" )
+  newHists.append( ROOT.THStack() )
+  for iHist, hist in enumerate(Hists):
+    if SampleTypes[iHist] != 'bkg':
+      newSampleTypes.append( SampleTypes[iHist] )
+      newHists.append( hist )
+    else:
+      newHists[-1].Add( hist )
+
+  return newSampleTypes, newHists
 
 ######### Rescale the histograms ###########
 def scaleHists( histTypes, hists, lumiScale ):
@@ -315,6 +338,10 @@ def scaleHists( histTypes, hists, lumiScale ):
   ## Normalizing any number of seperate data and bkg samples to either data or bkg
   ## If normalizing signals to one another, just treat them as bkg!
   ## Normalizing 1 bkg to data, and scaling all signal histograms by the same fraction
+
+
+# For now if there is a stack - then no normalize?
+#In the future maybe normalize each histogram by some sort of sum equation ?!
 
   if args.normToBkg or args.normToData:
     if args.normToBkg:
@@ -395,7 +422,8 @@ def plot1D( Hists, SampleTypes ):
     drawString += 'histe'
     if len(args.dataType) > 0 and not "data" == SampleTypes[iH]:
       # not data so can make sure markers are not seen - see error bars
-      Hists[iH].SetMarkerSize( 0.0 )
+      if not "stack" == SampleTypes[iH]:
+        Hists[iH].SetMarkerSize( 0.0 )
       if not "bkg" == SampleTypes[iH]:
         drawString += 'fe'
       else: #why is this here?

@@ -8,10 +8,9 @@ GRLFile = 'data15_13TeV.periodAllYear_HEAD_DQDefects-00-01-02_PHYS_StandardGRL_A
 os.system('wget http://atlasdqm.web.cern.ch/atlasdqm/grlgen/Atlas_Ready/'+GRLFile+' -O '+GRLFile)
 
 Files = ["Data13TeV_Main_gridSamples.txt",
-    "Data13TeV_Main_EXOT2_D1_gridSamples.txt",
-    "Data13TeV_Main_EXOT2_D2_gridSamples.txt",
-    "Data13TeV_Main_EXOT2_D3_gridSamples.txt",
     "Data13TeV_Main_EXOT2_D4_gridSamples.txt",
+    "Data13TeV_Main_EXOT2_D5_gridSamples.txt",
+    "Data13TeV_Main_EXOT2_D6_gridSamples.txt",
     "Data13TeV_Debug_gridSamples.txt"
     ]
 
